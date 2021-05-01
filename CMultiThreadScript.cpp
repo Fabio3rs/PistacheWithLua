@@ -60,6 +60,23 @@ int CMultiThreadScript::view(lua_State* L)
 	return p.rtn();
 }
 
+int CMultiThreadScript::vp(lua_State* L)
+{
+	CLuaFunctions::LuaParams p(L);
+
+	if (p.getNumParams() == 1)
+	{
+		lua_getglobal(L, "targetString");
+
+		int64_t i = lua_tointeger(L, -1);
+
+		std::string& targetStr = *(std::string*)i;
+
+		targetStr += lua_tostring(L, 1);
+	}
+
+	return 0;
+}
 
 int CMultiThreadScript::routeRegister(lua_State* L)
 {
@@ -100,6 +117,7 @@ int CMultiThreadScript::routeRegister(lua_State* L)
 void CMultiThreadScript::registerControllersFunctions(lua_State* L)
 {
 	lua_register(L, "view", view);
+	lua_register(L, "vp", vp);
 	lua_register(L, "routeRegister", routeRegister);
 
 }

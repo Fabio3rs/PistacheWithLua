@@ -50,6 +50,8 @@ class CMultiThreadScript
 
 	static int view(lua_State* L);
 
+	static int vp(lua_State* L);
+
 	static int routeRegister(lua_State* L);
 
 	static void registerControllersFunctions(lua_State* L);
