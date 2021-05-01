@@ -16,7 +16,10 @@ void LuaRoute::operator()(const Pistache::Rest::Request& request, Pistache::Http
 {
     CMultiThreadScript& mgr = CMultiThreadScript::scriptsMgr();
 
-    std::string result = mgr.runRoute(script, route);
+    response.cookies()
+        .add(Pistache::Http::Cookie("lang", "pt-BR"));
+
+    std::string result = mgr.runRoute(script, route, request, response);
     response.send(Pistache::Http::Code::Ok, result);
 }
 

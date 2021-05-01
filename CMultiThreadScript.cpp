@@ -145,7 +145,7 @@ CMultiThreadScript& CMultiThreadScript::scriptsMgr()
 	return multiScriptMgr;
 }
 
-std::string CMultiThreadScript::runRoute(int scriptID, size_t routeId)
+std::string CMultiThreadScript::runRoute(int scriptID, size_t routeId, const Pistache::Rest::Request& request, Pistache::Http::ResponseWriter& response)
 {
 	std::string result;
 	auto& script = scriptList[scriptID];
@@ -156,11 +156,33 @@ std::string CMultiThreadScript::runRoute(int scriptID, size_t routeId)
 
 		registerControllersFunctions(testInstance.luaState);
 		setLuaGlobal(testInstance.luaState, "targetString", (int64_t)&result);
+
+		{
+			CLuaH::customParam reqcookies;
+			reqcookies.setastable();
+
+			auto& table = reqcookies.getTableData();
+			for (const auto& rcookies : request.cookies())
+			{
+				table[rcookies.name] = rcookies.value;
+			}
+
+			reqcookies.pushToLuaStack(testInstance.luaState);
+			lua_setglobal(testInstance.luaState, "_cookies");
+		}
+
 		CLuaH::Lua().runScript(testInstance);
 
 		if (CLuaH::Lua().runInternalRouteWithParams(testInstance, routeId, { (int64_t)routeId, (int64_t)&result }))
 		{
+			lua_getglobal(testInstance.luaState, "set_cookies");
+			CLuaH::customParam cookies;
+			cookies.getFromArgs(testInstance.luaState, -1);
 
+			for (auto& c : cookies.getTableData())
+			{
+				response.cookies().add({ c.first, c.second.getString() });
+			}
 		}
 		else
 		{

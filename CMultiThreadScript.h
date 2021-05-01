@@ -64,7 +64,7 @@ public:
 
 	static CMultiThreadScript& scriptsMgr();
 
-	std::string runRoute(int scriptID, size_t routeId);
+	std::string runRoute(int scriptID, size_t routeId, const Pistache::Rest::Request& request, Pistache::Http::ResponseWriter& response);
 
 	void loadAll();
 
